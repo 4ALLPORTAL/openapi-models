@@ -11,8 +11,8 @@ ErrorResponse:
           type: string
           example: ValidationFailed
           deprecated: true
-          description: For removal since 4.13.0
+          description: For removal since 4.16.0
         message:
           type: string
           deprecated: true
-          description: For removal since 4.13.0
+          description: For removal since 4.16.0
