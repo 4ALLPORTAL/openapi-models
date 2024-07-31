@@ -1,0 +1,47 @@
+ErrorResponse:
+  allOf:
+    - $ref: 'https://opensource.zalando.com/restful-api-guidelines/models/problem-1.0.1.yaml#/Problem'
+    - type: object
+      properties:
+        variables:
+          additionalProperties:
+            type: string
+          description: Values for the variables used in the translation defined by type parameter
+        code:
+          type: string
+          example: ValidationFailed
+          deprecated: true
+          description: For removal since 4.16.0
+        message:
+          type: string
+          deprecated: true
+          description: For removal since 4.16.0
+        errors:
+          type: array
+          deprecated: true
+          description: For removal since 4.16.0
+          items:
+            $ref: '#/ErrorResponseItem'
+
+ErrorResponseItem:
+  type: object
+  deprecated: true
+  description: For removal since 4.16.0
+  properties:
+    code:
+      type: string
+      example: InvalidFieldValue
+    name:
+      type: string
+      example: email
+    detail:
+      type: string
+      description: This is a label key for translation
+      example: Keine gültige E-Mail Adresse.
+    message:
+      type: string
+      example: Invalid Email Address.
+    variables:
+      additionalProperties:
+        type: object
+      description: Values for the variables in used in the detail message
