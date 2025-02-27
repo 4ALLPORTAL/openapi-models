@@ -1,0 +1,21 @@
+ModuleObject:
+  type: object
+  properties:
+    _embedded:
+      additionalProperties:
+        type: array
+        items:
+          $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/module-object-1.0.0.yaml#/ModuleObject'
+    id:
+      type: string
+    module:
+      type: string
+    type:
+      type: string
+    mod_time:
+      type: string
+      format: 'date-time'
+  additionalProperties:
+    type: array
+    items:
+      $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/ce-type-1.0.0.yaml#/CEType'
