@@ -1,0 +1,25 @@
+CEType:
+  type: object
+  properties:
+    value:
+      example: test
+      description: Can be any value - string, number, boolean, array or object.
+    dimensions:
+      additionalProperties:
+        type: object
+    instruction:
+      type: string
+      $ref: '#/SetInstruction'
+      description: describe how the new value will be set
+      default: overwrite
+      example: if_empty
+
+SetInstruction:
+  type: string
+  enum:
+    - overwrite
+    - if_empty
+    - list_add
+    - list_add_force
+    - list_remove
+    - append_text
