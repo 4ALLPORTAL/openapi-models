@@ -9,17 +9,15 @@ CEType:
         type: object
     instruction:
       type: string
-      $ref: '#/SetInstruction'
-      description: describe how the new value will be set
+      description: |
+        Describes how the new value will be set, possible values:
+        - overwrite
+        - if_empty
+        - list_add
+        - list_add_force
+        - list_remove
+        - append_text
+        - list_add_before[:<item>]
+        - list_add_after[:<item>]
       default: overwrite
       example: if_empty
-
-SetInstruction:
-  type: string
-  enum:
-    - overwrite
-    - if_empty
-    - list_add
-    - list_add_force
-    - list_remove
-    - append_text
