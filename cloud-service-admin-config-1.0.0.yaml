@@ -1,3 +1,6 @@
+# Responses referenced from a path item are resolved relative to the spec that includes the path
+# item, not to this file, so they need an absolute URL. Schema references resolve relative to this
+# file and stay relative.
 CloudServiceAdminConfigsPath:
   get:
     tags:
@@ -16,9 +19,9 @@ CloudServiceAdminConfigsPath:
             schema:
               $ref: '#/CloudServiceAdminConfigs'
       '403':
-        $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
       default:
-        $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
 
 CloudServiceIslandAssetPath:
   get:
@@ -78,7 +81,7 @@ CloudServiceIslandAssetPath:
           Cache-Control:
             $ref: '#/CloudServiceCacheControlHeader'
       '403':
-        $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
       '404':
         description: Unknown configuration, or a file not referenced in `island_assets`.
         content:
@@ -86,7 +89,7 @@ CloudServiceIslandAssetPath:
             schema:
               $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceProblem'
       default:
-        $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
 
 CloudServiceETagHeader:
   description: Weak ETag of the file, a hash of its content, e.g. `W/"3q2-7w"`.
