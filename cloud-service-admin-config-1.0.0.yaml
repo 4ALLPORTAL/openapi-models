@@ -1,0 +1,244 @@
+# Responses referenced from a path item are resolved relative to the spec that includes the path
+# item, not to this file, so they need an absolute URL. Schema references resolve relative to this
+# file and stay relative.
+CloudServiceAdminConfigsPath:
+  get:
+    tags:
+      - AdminConfig
+    summary: Describe the admin configurations of the service
+    description: |
+      Returns every configuration the admin area of the Core offers for this service: its
+      snap-in, its endpoint and methods and the paths of its island files, plus the texts and
+      icons once for all configurations. Contains no tenant data.
+    operationId: getAdminConfigs
+    responses:
+      '200':
+        description: The descriptions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/CloudServiceAdminConfigs'
+      '403':
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
+      default:
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
+
+CloudServiceIslandAssetPath:
+  get:
+    tags:
+      - AdminConfig
+    summary: Get a file of the island of a configuration
+    description: |
+      Serves a file of the island of a configuration. Only files referenced in
+      `island_assets` of `GET /admin-configs` are served; `js` always exists, `css` only if
+      the island has a stylesheet, further keys may follow.
+
+      A file only changes with a release. Each response carries a weak `ETag`; a request
+      whose `If-None-Match` matches it gets `304 Not Modified` without the file.
+    operationId: getIslandAsset
+    parameters:
+      - name: config_name
+        in: path
+        required: true
+        description: Name of the configuration, e.g. `default`.
+        schema:
+          type: string
+          pattern: '^[a-z][a-z0-9-]{0,63}$'
+      - name: file_name
+        in: path
+        required: true
+        description: Name of the file, e.g. `island.js`.
+        schema:
+          type: string
+          maxLength: 255
+          pattern: '^[A-Za-z0-9_-][A-Za-z0-9._-]*$'
+      - name: If-None-Match
+        in: header
+        required: false
+        description: |
+          ETags of a cached copy, as received in `ETag`. Compared weakly (RFC 9110,
+          §13.1.2), so a tag made weak by compression still matches.
+        schema:
+          type: string
+    responses:
+      '200':
+        description: The file, with the media type of its extension.
+        headers:
+          ETag:
+            $ref: '#/CloudServiceETagHeader'
+          Cache-Control:
+            $ref: '#/CloudServiceCacheControlHeader'
+        content:
+          '*/*':
+            schema:
+              type: string
+              format: binary
+      '304':
+        description: The cached copy matching `If-None-Match` is still current.
+        headers:
+          ETag:
+            $ref: '#/CloudServiceETagHeader'
+          Cache-Control:
+            $ref: '#/CloudServiceCacheControlHeader'
+      '403':
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceFeatureNotAssigned'
+      '404':
+        description: Unknown configuration, or a file not referenced in `island_assets`.
+        content:
+          application/problem+json:
+            schema:
+              $ref: 'cloud-service-problem-1.0.0.yaml#/CloudServiceProblem'
+      default:
+        $ref: 'https://raw.githubusercontent.com/4ALLPORTAL/openapi-models/main/cloud-service-problem-1.0.0.yaml#/CloudServiceUnexpectedError'
+
+CloudServiceETagHeader:
+  description: Weak ETag of the file, a hash of its content, e.g. `W/"3q2-7w"`.
+  schema:
+    type: string
+
+CloudServiceCacheControlHeader:
+  description: |
+    `no-cache`: a client may keep the file, but revalidates it with `If-None-Match` before
+    each use, so a new release takes effect at once.
+  schema:
+    type: string
+
+CloudServiceAdminConfigs:
+  type: object
+  description: |
+    All admin configurations of a cloud service, with their texts and icons once for all of
+    them. Same structure for every service.
+  required:
+    - configs
+    - locale
+  properties:
+    configs:
+      type: array
+      description: One description per configuration.
+      items:
+        $ref: '#/CloudServiceAdminConfig'
+    locale:
+      type: object
+      description: Texts per locale (e.g. `de_DE`), then per label key.
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string
+    icons:
+      type: object
+      description: SVG content per icon key.
+      additionalProperties:
+        type: string
+
+CloudServiceAdminConfig:
+  type: object
+  required:
+    - name
+    - snap_in
+    - island_assets
+  properties:
+    name:
+      type: string
+      description: Name of the configuration, unique within the service.
+      pattern: '^[a-z][a-z0-9-]{0,63}$'
+    snap_in:
+      $ref: '#/CloudServiceSnapIn'
+    island_assets:
+      type: object
+      description: |
+        Paths at the gateway of the island files. `js` is always present, `css` only if the
+        island has a stylesheet; an island rendering in the Shadow DOM bundles its styles in
+        `js`. Further keys are allowed, each gets its own link in the admin structure.
+      additionalProperties:
+        type: string
+
+CloudServiceSnapIn:
+  type: object
+  description: |
+    Snap-in definition, the JSON equivalent of a `.4apadminsi`, restricted to the fields an
+    island may set, plus `cloud`, set by the service. Missing fields get the defaults of the
+    Core.
+  required:
+    - group
+    - cloud
+  properties:
+    label:
+      type: string
+      description: Label key of the entry, e.g. `L-A-NLS-DEFAULT`.
+    icon:
+      type: string
+      description: Icon key of the entry, e.g. `A-NLS-DEFAULT`.
+    group:
+      type: string
+      description: Group of the admin area the entry is sorted into, e.g. `dam`.
+    visible:
+      type: boolean
+      description: Whether the entry is shown. Missing means `true`.
+    information:
+      $ref: '#/CloudServiceSnapInInformation'
+    cloud:
+      $ref: '#/CloudServiceSnapInCloud'
+
+CloudServiceSnapInInformation:
+  type: object
+  description: Info banner of the entry.
+  properties:
+    label:
+      type: string
+      description: Label key of the headline.
+    info:
+      type: string
+      description: Label key of the text.
+    icon:
+      type: string
+      description: Icon key.
+    buttons:
+      type: array
+      items:
+        $ref: '#/CloudServiceSnapInButton'
+
+CloudServiceSnapInButton:
+  type: object
+  description: Button of the info banner.
+  required:
+    - type
+    - label
+  properties:
+    type:
+      type: string
+      description: Action of the button, e.g. `close`.
+    label:
+      type: string
+      description: Label key of the button.
+    primary:
+      type: boolean
+      description: Whether it is the primary button. Missing means `false`.
+    parameter:
+      type: object
+      description: Parameters of the action; their structure depends on `type`.
+      additionalProperties: true
+
+CloudServiceSnapInCloud:
+  type: object
+  description: Where the island reaches the configuration.
+  required:
+    - endpoint
+    - methods
+  properties:
+    endpoint:
+      type: string
+      description: Path at the gateway, e.g. `/nls/config`.
+    methods:
+      type: array
+      description: Every method the service offers at `endpoint`, each once.
+      minItems: 1
+      items:
+        $ref: '#/CloudServiceConfigMethod'
+
+CloudServiceConfigMethod:
+  type: string
+  description: HTTP method offered at the endpoint of a configuration.
+  enum:
+    - GET
+    - PATCH
+    - DELETE
